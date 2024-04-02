@@ -3,11 +3,10 @@ using UnityEngine;
 
 public class BallSpawner : MonoBehaviour
 {
-
     public static BallSpawner Instance { get; private set; }
 
     [SerializeField] BallShooter _ballShooter;
-    [SerializeField] GameObject _ballContainer, _ballShooterContainer;
+    public GameObject BallContainer, BallShooterContainer;
     [SerializeField] Transform _referencePoint;
     [SerializeField] int _startingBlockNumberOfRows = 4;
     GameObject _ballToShoot, _nextBallToShoot; // the ball that will be shot is balltoshoot, the nextballtoshoot is the small ball beside it
@@ -19,7 +18,7 @@ public class BallSpawner : MonoBehaviour
     int _ballQuantityPerRow;
     bool _rowToSpawnIsToTheRightSide = false;
 
-    public GameObject BallContainer { get{ return _ballContainer; }}
+    //public GameObject BallContainer { get{ return BallContainer; }}
     public GameObject BallToShoot {get { return _ballToShoot; } set { _ballToShoot = value;}}
     public GameObject NextBallToShoot {get { return _nextBallToShoot; } set { _nextBallToShoot = value;}}
     
@@ -57,9 +56,9 @@ public class BallSpawner : MonoBehaviour
 
     void InstantiateFirstBall()
     {
-        _nextBallToShoot = ObjectPool._instance.GetPooledObject();
+        _nextBallToShoot = ObjectPool._instance.GetRandomPooledBall();
         ObjectPool._instance.ActivateAndSetPooledObjectPosition(_nextBallToShoot, _nextBallToShootPosition, 0.7f);
-        _nextBallToShoot.transform.SetParent(_ballShooterContainer.transform);
+        _nextBallToShoot.transform.SetParent(BallShooterContainer.transform);
     }
 
     void Update()
@@ -97,10 +96,10 @@ public class BallSpawner : MonoBehaviour
 
         for (int i = 0; i < _ballQuantityPerRow; i++)
         {
-            _instantiatedBall = ObjectPool._instance.GetPooledObject();
+            _instantiatedBall = ObjectPool._instance.GetRandomPooledBall();
             ObjectPool._instance.ActivateAndSetPooledObjectPosition(_instantiatedBall, _targetSpawnPosition, 1);
             _targetSpawnPosition = new Vector3(_targetSpawnPosition.x + _ballSpawnOffset, _referencePoint.position.y,0);
-            _instantiatedBall.transform.SetParent(_ballContainer.transform);
+            _instantiatedBall.transform.SetParent(BallContainer.transform);
             //Debug.Log(_targetSpawnPosition);
         }
 
@@ -126,16 +125,18 @@ public class BallSpawner : MonoBehaviour
     {
         _ballToShoot = _nextBallToShoot;
         _ballToShoot.transform.position = _ballToShootPosition;
-        _ballToShoot.transform.localScale = new Vector3 (1,1,1);
+        _ballToShoot.transform.localScale = new Vector3 (1, 1, 1);
+        //_ballToShoot.GetComponent<CircleCollider2D>().enabled = false;
 
-        _nextBallToShoot = ObjectPool._instance.GetPooledObject();
+        _nextBallToShoot = ObjectPool._instance.GetRandomPooledBall();
         ObjectPool._instance.ActivateAndSetPooledObjectPosition(_nextBallToShoot, _nextBallToShootPosition, 0.7f);
-        _nextBallToShoot.transform.SetParent(_ballShooterContainer.transform);
+        _nextBallToShoot.transform.SetParent(BallShooterContainer.transform);
+        _nextBallToShoot.GetComponent<CircleCollider2D>().enabled = false;
     }
 
     IEnumerator MoveDownBallContainer()
     {
-        Vector3 startPosition = _ballContainer.transform.position;
+        Vector3 startPosition = BallContainer.transform.position;
         Vector3 targetPosition = startPosition - Vector3.up * _ballContainerMoveDistance;
         float elapsedTime = 0f;
 
@@ -143,9 +144,11 @@ public class BallSpawner : MonoBehaviour
        {
             elapsedTime += Time.deltaTime;
             float percentageComplete = elapsedTime / _timeDelayBetweenSpawningStartRows;
-            _ballContainer.transform.position = Vector3.Lerp(startPosition, targetPosition, percentageComplete);
+            BallContainer.transform.position = Vector3.Lerp(startPosition, targetPosition, percentageComplete);
             yield return null;
        }
-        _ballContainer.transform.position = targetPosition;
+        BallContainer.transform.position = targetPosition;
     }
+
+
 }

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using UnityEngine;
 
 public class ObjectPool : MonoBehaviour
@@ -32,11 +33,24 @@ public class ObjectPool : MonoBehaviour
         }
     }
 
-    public GameObject GetPooledObject()
+    public GameObject GetRandomPooledBall()
     {
         for (int i=0; i < _pooledObjects.Count; i++)
         {
-            if(!_pooledObjects[i].activeInHierarchy)
+            int randomNumber = Random.Range(0,_pooledObjects.Count);
+            if(!_pooledObjects[randomNumber].activeInHierarchy)
+            {
+                return _pooledObjects[randomNumber];
+            }
+        }
+        return null;
+    }
+
+    public GameObject GetPooledBallByTag(int tag)
+    {
+        for (int i=0; i < _pooledObjects.Count; i++)
+        {
+            if(!_pooledObjects[i].activeInHierarchy && _pooledObjects[i].tag ==  tag.ToString())
             {
                 return _pooledObjects[i];
             }

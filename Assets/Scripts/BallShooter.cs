@@ -41,6 +41,7 @@ public class BallShooter : MonoBehaviour
     void ShootBall()
     {   
         _ballToShoot = _ballSpawner.BallToShoot; //takes the gameobject that the ballspawner has spawned
+        _ballToShoot.GetComponent<CircleCollider2D>().enabled = true;
         Rigidbody2D rb = _ballToShoot.GetComponent<Rigidbody2D>();
 
         rb.bodyType = RigidbodyType2D.Dynamic;
@@ -52,30 +53,5 @@ public class BallShooter : MonoBehaviour
         rb.AddForce(ballDirection * _shotSpeed, ForceMode2D.Impulse);
         BallIsShot = true;
     }
-
-    void SnapBallToBlock()
-    {
-
-    }
-    
-
-    // public bool BallHasArrivedToBallBlock()
-    //     {
-    //         Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, _ballToShoot.GetComponent<CircleCollider2D>().radius);
-
-    //         // Check if any colliders were found (excluding itself)
-    //         if (colliders.Length > 0)
-    //         {
-    //             Debug.Log("ball Arrived!");
-    //             return true;
-
-    //         }
-    //         else 
-    //         {
-    //             Debug.Log("nothing yet");
-    //             return false;
-    //         }
-            
-    //    }
     
 }

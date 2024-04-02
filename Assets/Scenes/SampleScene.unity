@@ -1017,8 +1017,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _ballShooter: {fileID: 0}
-  _ballContainer: {fileID: 631302456}
-  _ballShooterContainer: {fileID: 1930194571}
+  BallContainer: {fileID: 631302456}
+  BallShooterContainer: {fileID: 1930194571}
   _referencePoint: {fileID: 500925580}
   _startingBlockNumberOfRows: 4
 --- !u!4 &1499579273
@@ -1407,7 +1407,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &2103131164
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1421,6 +1421,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _ballShooter: {fileID: 0}
+  objectPoolGameObject: {fileID: 2003464683}
+  _connectedBalls: []
+  ball1: {fileID: 0}
+  ball2: {fileID: 0}
 --- !u!4 &2103131165
 Transform:
   m_ObjectHideFlags: 0
@@ -1447,9 +1451,9 @@ SceneRoots:
   - {fileID: 764569372}
   - {fileID: 1759095195}
   - {fileID: 500925580}
-  - {fileID: 1499579273}
-  - {fileID: 631302457}
-  - {fileID: 1930194572}
   - {fileID: 1801671478}
-  - {fileID: 2003464683}
   - {fileID: 2103131165}
+  - {fileID: 1499579273}
+  - {fileID: 1930194572}
+  - {fileID: 631302457}
+  - {fileID: 2003464683}
