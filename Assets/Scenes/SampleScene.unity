@@ -1376,6 +1376,10 @@ MonoBehaviour:
   - {fileID: 1325115704820495759, guid: d24652f6178c3d44eb01192d70cf9cd0, type: 3}
   - {fileID: 2936088861307273670, guid: beed87df98bd50649b52fb60b44587b7, type: 3}
   - {fileID: 8393048693228226194, guid: 6485c49c3ab791f489ddc48a111e4419, type: 3}
+  - {fileID: 1877263875736457853, guid: 6be7b920a12d14d4894f25d793ef5451, type: 3}
+  - {fileID: 431820751117962982, guid: f9065856953add8449a0a99605c5a350, type: 3}
+  - {fileID: 8415712516032747215, guid: 38ad875ce0010ec499545003aa574d73, type: 3}
+  - {fileID: 4414303221793286262, guid: e06b4488ea104404dbd8ddfc074b273e, type: 3}
 --- !u!4 &2003464683
 Transform:
   m_ObjectHideFlags: 0
@@ -1423,8 +1427,6 @@ MonoBehaviour:
   _ballShooter: {fileID: 0}
   objectPoolGameObject: {fileID: 2003464683}
   _connectedBalls: []
-  ball1: {fileID: 0}
-  ball2: {fileID: 0}
 --- !u!4 &2103131165
 Transform:
   m_ObjectHideFlags: 0
