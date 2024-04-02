@@ -1366,11 +1366,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _ballPrefabList:
   - {fileID: 4815755499675372768, guid: 17338b29e0ed64847a5da208caf83100, type: 3}
-  - {fileID: 4815755499675372768, guid: 17338b29e0ed64847a5da208caf83100, type: 3}
-  - {fileID: 4815755499675372768, guid: 17338b29e0ed64847a5da208caf83100, type: 3}
   - {fileID: 8211771431432670752, guid: 0850c8a6b10308f42bfcb9c7e8b59800, type: 3}
-  - {fileID: 8211771431432670752, guid: 0850c8a6b10308f42bfcb9c7e8b59800, type: 3}
-  - {fileID: 9160501286799349258, guid: fde0c0c581e3e7d4abbfc12e6fb3e5ca, type: 3}
   - {fileID: 9160501286799349258, guid: fde0c0c581e3e7d4abbfc12e6fb3e5ca, type: 3}
   - {fileID: 4542251492503287609, guid: 7fabb93c9330af24ab960a7142bfb1d8, type: 3}
   - {fileID: 1325115704820495759, guid: d24652f6178c3d44eb01192d70cf9cd0, type: 3}

@@ -24,12 +24,15 @@ public class ObjectPool : MonoBehaviour
 
     public void CreateBallPool()
     {
-                for (int i=0; i< amountToPool; i++)
+            foreach (GameObject ball in _ballPrefabList)
         {
-            GameObject _poolObject = Instantiate(_ballPrefabList[Random.Range(0, 10)]);
-            _poolObject.SetActive(false);
-            _poolObject.transform.SetParent(gameObject.transform);
-            _pooledObjects.Add(_poolObject);
+            for (int i = 0; i<20; i++)
+            {
+                GameObject _poolObject = Instantiate(ball);
+                _poolObject.SetActive(false);
+                _poolObject.transform.SetParent(gameObject.transform);
+                _pooledObjects.Add(_poolObject);
+            }
         }
     }
 
@@ -38,7 +41,7 @@ public class ObjectPool : MonoBehaviour
         for (int i=0; i < _pooledObjects.Count; i++)
         {
             int randomNumber = Random.Range(0,_pooledObjects.Count);
-            if(!_pooledObjects[randomNumber].activeInHierarchy)
+            if(!_pooledObjects[randomNumber].activeInHierarchy && int.Parse(_pooledObjects[randomNumber].tag)<=64)
             {
                 return _pooledObjects[randomNumber];
             }
@@ -50,7 +53,7 @@ public class ObjectPool : MonoBehaviour
     {
         for (int i=0; i < _pooledObjects.Count; i++)
         {
-            if(!_pooledObjects[i].activeInHierarchy && _pooledObjects[i].tag ==  tag.ToString())
+            if(!_pooledObjects[i].activeInHierarchy && _pooledObjects[i].tag == tag.ToString())
             {
                 return _pooledObjects[i];
             }

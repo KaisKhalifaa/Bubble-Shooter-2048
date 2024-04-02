@@ -121,7 +121,7 @@ public class BallInteractionManager : MonoBehaviour
             int resultingBallTag = (int)(ballTagNumber * Math.Pow(2, connectedBallsAmount-1));
             _resultingBall = ObjectPool._instance.GetPooledBallByTag(resultingBallTag);
             ObjectPool._instance.ActivateAndSetPooledObjectPosition(_resultingBall, lastBallInConnectedBalls.transform.position, 1f);
-            //resultingBall.transform.SetParent(BallContainer.transform);
+            _resultingBall.transform.SetParent(BallSpawner.Instance.BallContainer.transform);
 
             // Clear the list
             _connectedBalls.Clear();
