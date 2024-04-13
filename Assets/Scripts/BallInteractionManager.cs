@@ -1,4 +1,3 @@
-
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,16 +5,22 @@ using System.Linq;
 using System;
 public class BallInteractionManager : MonoBehaviour
 {   
-        public static BallInteractionManager Instance { get; private set; }
+    public static BallInteractionManager Instance { get; private set; }
 
-    [SerializeField] BallShooter _ballShooter;
-     GameObject _ball;
-    [SerializeField] Transform objectPoolGameObject;
-    bool _ballVisited = true;
-    [SerializeField] List<GameObject> _connectedBalls = new List<GameObject>();
-    static bool _coroutineIsFinished = false, _checker;
+    BallShooter _ballShooter;
+    ObjectPools _objectPooler;
+    [SerializeField] List<GameObject> _connectedSimilarBalls = new List<GameObject>();
+    [SerializeField] int _numberOfShotsBeforeNextRow = 3;
+    [SerializeField] GameObject _ballPrefab;
+    GameObject _ball;
+    public bool BallMergingIsFinished = true, RowShouldSpawn = false, _ballVisitedForMerge=false, _popSoundShouldPlay=false;
+    [SerializeField] int _spawnedRowsInCycle = 0;
+    public float BallCollisionRadius;
 
-    static GameObject _resultingBall;
+    public GameObject _resultingBall;
+
+    public int NumberOfShotsBeforeNextRow {private get { return _numberOfShotsBeforeNextRow; } set { _numberOfShotsBeforeNextRow = value; } }
+    public GameObject ResultingBall { get {return _resultingBall; } private set { _resultingBall = value; }}
     
     void Awake()
     {
@@ -28,32 +33,46 @@ public class BallInteractionManager : MonoBehaviour
     void Start()
     {
         _ballShooter = BallShooter.Instance;
+        _objectPooler = ObjectPools.Instance;
+        BallCollisionRadius = _ballPrefab.GetComponent<CircleCollider2D>().radius + 0.2f;
+
     }
     void Update()
     {
         if (_ballShooter.BallArrived)
         {
-            _ball = _ballShooter.BallToShoot;
-            StartCoroutine(BallAnimationRepeater(_ball));
             _ballShooter.BallArrived = false;
+            _ball = _ballShooter.BallToShoot;
+            StartCoroutine(RepeatMergeBallsAnimation(_ball));
         }
-        
     }
     
-    IEnumerator BallAnimationRepeater(GameObject ball)
-    {
+    IEnumerator RepeatMergeBallsAnimation(GameObject ball)
+    {   
         if (HasSimilarNeighbor(ball))
         {
             PutSimilarConnectedBallsInList(ball);
-            yield return StartCoroutine(AnimateConnectedBalls(int.Parse(ball.tag)));
-            StartCoroutine(BallAnimationRepeater(_resultingBall));
+            yield return StartCoroutine(MergeConnectedBalls(int.Parse(ball.tag)));
+            yield return StartCoroutine(RepeatMergeBallsAnimation(_resultingBall));
+        }
+        else
+        {   
+            //yield return StartCoroutine(MergeConnectedBalls(int.Parse(ball.tag))); // Ensure the last merge animation is completed
+            BallMergingIsFinished = true;
+            _spawnedRowsInCycle+=1;
+            if (_spawnedRowsInCycle == _numberOfShotsBeforeNextRow)
+            {
+                RowShouldSpawn = true; 
+                _spawnedRowsInCycle = 0;
+            }
+            _connectedSimilarBalls.Clear();
+            yield return null;
         }
     }
 
     bool HasSimilarNeighbor(GameObject ball) 
     {
-        float ballCollisionRadius = ball.GetComponent<CircleCollider2D>().radius + 0.4f;
-        var neighborsSimilarNumberColliders = Physics2D.OverlapCircleAll(ball.transform.position, ballCollisionRadius).ToList().FindAll(x => x.CompareTag(ball.tag) && x.gameObject != ball);
+        var neighborsSimilarNumberColliders = Physics2D.OverlapCircleAll(ball.transform.position, BallCollisionRadius).ToList().FindAll(x => x.CompareTag(ball.tag) && x.gameObject != ball);
 
         if (!neighborsSimilarNumberColliders.Any())
         {
@@ -66,90 +85,101 @@ public class BallInteractionManager : MonoBehaviour
     void PutSimilarConnectedBallsInList(GameObject ball)
     {
         //List<GameObject> similarSurroundingBalls = new List<GameObject>();
-        float ballCollisionRadius = ball.GetComponent<CircleCollider2D>().radius + 0.4f;
-        Collider2D[] neighborsColliders = Physics2D.OverlapCircleAll(ball.transform.position, ballCollisionRadius);
+        Collider2D[] neighborsColliders = Physics2D.OverlapCircleAll(ball.transform.position, BallCollisionRadius);
         Ball ballComponent = ball.GetComponent<Ball>();
 
-        ballComponent.Visited = true;
+        ballComponent.VisitedToMerge = true;
 
         foreach (Collider2D collider in neighborsColliders)
         {
             if (collider.gameObject.GetComponent<Ball>() != null)
             {
-            _ballVisited = collider.gameObject.GetComponent<Ball>().Visited;
+            _ballVisitedForMerge = collider.gameObject.GetComponent<Ball>().VisitedToMerge;
             }
-            if (collider.CompareTag(ball.tag) && collider.gameObject != ball && !_ballVisited)
-            // bool ballVisited = collider.gameObject.GetComponent<Ball>().Visited;
-            // if (!ballVisited)
+            if (collider.CompareTag(ball.tag) && collider.gameObject != ball && !_ballVisitedForMerge)
             PutSimilarConnectedBallsInList(collider.gameObject);
             else
             continue;
         }
 
-        _connectedBalls.Add(ball);
+        _connectedSimilarBalls.Add(ball);
         //Debug.Log("ball added to list");
+        ReorderListArrangement(_connectedSimilarBalls);
     }
 
-    IEnumerator AnimateConnectedBalls(int ballTagNumber)
+    void ReorderListArrangement(List<GameObject> connectedSimilarBallsList)
     {
-        _coroutineIsFinished = false;
+        int listBallTagNumber = int.Parse(connectedSimilarBallsList[0].gameObject.tag);
+        int resultingBallNumber = Mathf.Min((int)(listBallTagNumber * Math.Pow(2, connectedSimilarBallsList.Count-1)), 2048);
+        for (int i = 0; i < connectedSimilarBallsList.Count; i++)
+        {
+            Collider2D[] neighborsColliders = Physics2D.OverlapCircleAll(connectedSimilarBallsList[i].transform.position, BallCollisionRadius);
+            
+            foreach (Collider2D collider in neighborsColliders)
+            {
+                
+                if (collider.gameObject.CompareTag(resultingBallNumber.ToString()))
+                {
+                    GameObject aux = connectedSimilarBallsList[0];
+                    connectedSimilarBallsList[0] = connectedSimilarBallsList[i];
+                    connectedSimilarBallsList[i] = aux;
+                    break;
+                }
+            }
+        }
+    }
+
+    IEnumerator MergeConnectedBalls(int ballTagNumber)
+    {
         List<Coroutine> coroutines = new List<Coroutine>();
-        GameObject lastBallInConnectedBalls = _connectedBalls[0];
-        // Start all coroutines simultaneously
-        foreach (GameObject ball in _connectedBalls)
-        {   
-            Coroutine coroutine = StartCoroutine(MoveCoroutine(ball, lastBallInConnectedBalls.transform.position, 0.3f));
-            coroutines.Add(coroutine);//el wa9t eli nhottou supposé lwakt ta l transition f 7arket l balls!!!!!!
-        }
-
-        // Wait for all coroutines to finish
-        foreach (Coroutine coroutine in coroutines)
+        
+        if (_connectedSimilarBalls.Count > 0)
         {
-            yield return coroutine;
-        }
+            GameObject lastBallInConnectedBalls = _connectedSimilarBalls[0];
 
-        // After all coroutines have finished, perform additional actions
-        foreach (GameObject ball in _connectedBalls)
+            foreach (GameObject ball in _connectedSimilarBalls)
+            {   
+                Coroutine coroutine = StartCoroutine(MoveCoroutine(ball, lastBallInConnectedBalls.transform.position, 0.3f));
+                coroutines.Add(coroutine);
+            }
+
+            foreach (Coroutine coroutine in coroutines)
+            {
+                yield return coroutine;
+            }
+
+            foreach (GameObject ball in _connectedSimilarBalls)
+            {
+                ball.SetActive(false);
+                ball.transform.SetParent(_objectPooler.transform);
+                ball.GetComponent<Ball>().VisitedToMerge = false;
+            }
+                _popSoundShouldPlay = true;
+                double connectedBallsAmount =_connectedSimilarBalls.Count;
+                int resultingBallTag = Mathf.Min((int)(ballTagNumber * Math.Pow(2, connectedBallsAmount-1)), 2048);
+                _resultingBall = _objectPooler.GetPooledBallByTag(resultingBallTag);
+                _objectPooler.ActivateAndSetPooledObjectPosition(_resultingBall, lastBallInConnectedBalls.transform.position, 1f);
+                _resultingBall.transform.SetParent(BallSpawner.Instance.BallContainer.transform);
+                _connectedSimilarBalls.Clear();
+                yield return new WaitForEndOfFrame();
+            }
+            }
+
+        private IEnumerator MoveCoroutine(GameObject obj, Vector3 targetPosition, float duration)
         {
-            ball.SetActive(false);
-            ball.transform.SetParent(objectPoolGameObject);
-            ball.GetComponent<Ball>().Visited = false;
-        }
+            GameObject particleSystem = _objectPooler.GetParticleSystem();
+            _objectPooler.ActivateAndSetPooledObjectPosition(particleSystem, obj.transform.position, 1f);
+            particleSystem.GetComponent<ParticleSystem>().Play();
 
-            //look for the ball to replace the previously connected Balls
-            double connectedBallsAmount =_connectedBalls.Count;
-            int resultingBallTag = (int)(ballTagNumber * Math.Pow(2, connectedBallsAmount-1));
-            _resultingBall = ObjectPool._instance.GetPooledBallByTag(resultingBallTag);
-            ObjectPool._instance.ActivateAndSetPooledObjectPosition(_resultingBall, lastBallInConnectedBalls.transform.position, 1f);
-            _resultingBall.transform.SetParent(BallSpawner.Instance.BallContainer.transform);
-
-            // Clear the list
-            _connectedBalls.Clear();
-            _coroutineIsFinished = true;
+            float timeElapsed = 0f;
+            while (timeElapsed < duration)
+            {
+                timeElapsed += Time.deltaTime;
+                float t = Mathf.Clamp01(timeElapsed / duration);
+                obj.transform.position = Vector3.Lerp(obj.transform.position, targetPosition, t);
+                yield return null;
         }
-
-    private IEnumerator MoveCoroutine(GameObject obj, Vector3 targetPosition, float duration)
-    {
-        float timeElapsed = 0f;
-        while (timeElapsed < duration)
-        {
-            timeElapsed += Time.deltaTime;
-            float t = Mathf.Clamp01(timeElapsed / duration);
-            obj.transform.position = Vector3.Lerp(obj.transform.position, targetPosition, t);
-            yield return null;
-        }
-        obj.transform.position = targetPosition; // Ensure final position is exact
+        obj.transform.position = targetPosition;
     }
+    
 }
-
- // IEnumerator AnimateConnectedBalls()
-    // {
-    //     for (int i = 0; i<= _connectedBalls.Count-1; i++)
-    //     {
-    //         yield return StartCoroutine(MoveCoroutine(_connectedBalls[i], _connectedBalls[0].transform.position, 0.2f));
-    //         _connectedBalls[i].SetActive(false);
-    //         _connectedBalls[i].transform.SetParent(objectPoolGameObject);
-    //         _connectedBalls[i].GetComponent<Ball>().Visited = false;
-    //     }
-    //     _connectedBalls.Clear();
-    // }

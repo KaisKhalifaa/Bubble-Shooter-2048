@@ -3,8 +3,8 @@ using UnityEngine.InputSystem;
 
 public class TouchManager : MonoBehaviour
 {
-    [SerializeField] GameObject _visualFingerPosition;
-
+    public static TouchManager Instance { get; private set; }
+    //[SerializeField] GameObject _visualFingerPosition;
     PlayerInput _playerInput;
     Vector2 _tapPosition;
     bool _fingerReleased = false;
@@ -15,6 +15,11 @@ public class TouchManager : MonoBehaviour
 
     void Awake()
     {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+
         _playerInput = new PlayerInput();
         _playerInput.Touch.TouchPosition.performed += OnTapInput;
         _playerInput.Touch.TouchPosition.started += OnTapInput;
@@ -24,7 +29,7 @@ public class TouchManager : MonoBehaviour
     void OnTapInput(InputAction.CallbackContext ctx)
     {
         _tapPosition = Camera.main.ScreenToWorldPoint(ctx.ReadValue<Vector2>());
-        _visualFingerPosition.transform.position = _tapPosition;
+        //_visualFingerPosition.transform.position = _tapPosition;
         //Debug.Log(_tapPosition);
     }
 

@@ -16,6 +16,9 @@ TagManager:
   - 1024
   - 2048
   - border
+  - ceiling
+  - detachTrigger
+  - ground
   layers:
   - Default
   - TransparentFX
