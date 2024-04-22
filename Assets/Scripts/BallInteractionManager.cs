@@ -14,6 +14,7 @@ public class BallInteractionManager : MonoBehaviour
     [SerializeField] GameObject _ballPrefab;
     GameObject _ball;
     public bool BallMergingIsFinished = true, RowShouldSpawn = false, _ballVisitedForMerge=false, _popSoundShouldPlay=false;
+    bool _finishedMovingBalls = false;
     [SerializeField] int _spawnedRowsInCycle = 0;
     public float BallCollisionRadius;
 
@@ -139,7 +140,7 @@ public class BallInteractionManager : MonoBehaviour
 
             foreach (GameObject ball in _connectedSimilarBalls)
             {   
-                Coroutine coroutine = StartCoroutine(MoveCoroutine(ball, lastBallInConnectedBalls.transform.position, 0.3f));
+                Coroutine coroutine = StartCoroutine(MoveCoroutine(ball, lastBallInConnectedBalls.transform.position, 0.4f));
                 coroutines.Add(coroutine);
             }
 
@@ -167,6 +168,7 @@ public class BallInteractionManager : MonoBehaviour
 
         private IEnumerator MoveCoroutine(GameObject obj, Vector3 targetPosition, float duration)
         {
+            _finishedMovingBalls = false;
             GameObject particleSystem = _objectPooler.GetParticleSystem();
             _objectPooler.ActivateAndSetPooledObjectPosition(particleSystem, obj.transform.position, 1f);
             particleSystem.GetComponent<ParticleSystem>().Play();
@@ -180,6 +182,9 @@ public class BallInteractionManager : MonoBehaviour
                 yield return null;
         }
         obj.transform.position = targetPosition;
+        _finishedMovingBalls = true;
+        yield return new WaitUntil(() => _finishedMovingBalls);
+
     }
     
 }
