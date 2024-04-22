@@ -35,7 +35,7 @@ public class TouchManager : MonoBehaviour
 
     void OnTapCanceled(InputAction.CallbackContext ctx)
     {
-        _fingerReleased = true;                                         // boolean value for the ballshooter to know when to shoot
+        _fingerReleased = true;// boolean value for the ballshooter to know when to shoot
         //Debug.Log("finger released!");
     }
 

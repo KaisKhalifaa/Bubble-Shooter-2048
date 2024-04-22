@@ -14,7 +14,7 @@ public class BallDropper : MonoBehaviour
     public List<GameObject> BallsAttachedToCeiling = new List<GameObject>();
 
     bool _ballVisitedToDrop;
-
+    bool _finishedConnectingBalls = false;
     void Awake()
     {
         if (Instance == null)
@@ -27,7 +27,6 @@ public class BallDropper : MonoBehaviour
     {
         _ballSpawner = BallSpawner.Instance;
         _ballInteractionManager = BallInteractionManager.Instance;
-
     }
     void Update()
     {
@@ -51,8 +50,8 @@ public class BallDropper : MonoBehaviour
                 PutConnectedBallsInList(BallsAttachedToCeiling[i]);
             }
         }
-
-        yield return new WaitForEndOfFrame(); // Wait for end of frame to ensure the above operations are completed
+        yield return new WaitUntil(() => _finishedConnectingBalls);
+        //yield return new WaitForEndOfFrame(); // Wait for end of frame to ensure the above operations are completed
         DropMidairBalls();
     }
     void UpdateBallsInContainerList()
@@ -68,7 +67,6 @@ public class BallDropper : MonoBehaviour
                     _ballsInContainer.Add(ball);
                 }
             }
-
         }
     }
 
@@ -101,7 +99,10 @@ public class BallDropper : MonoBehaviour
     {
         
             //List<GameObject> similarSurroundingBalls = new List<GameObject>();
-            float ballCollisionRadius = ball.GetComponent<CircleCollider2D>().radius + 0.1f;
+            if(ball.TryGetComponent(out CircleCollider2D collider2D))
+            {
+            _finishedConnectingBalls = false;
+            float ballCollisionRadius = collider2D.radius + 0.1f;
             Collider2D[] neighborsColliders = Physics2D.OverlapCircleAll(ball.transform.position, ballCollisionRadius);
             Ball ballComponent = ball.GetComponent<Ball>();
 
@@ -119,6 +120,8 @@ public class BallDropper : MonoBehaviour
                 continue;
             }
             _ballsConnectedToCeiling.Add(ball);
-        
+            _finishedConnectingBalls = true;
+            }
+            
     }
 }

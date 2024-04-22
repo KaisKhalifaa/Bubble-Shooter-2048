@@ -14,7 +14,7 @@ public class BallSpawner : MonoBehaviour
     GameObject _ballToShoot, _nextBallToShoot; // the ball that will be shot is balltoshoot, the nextballtoshoot is the small ball beside it
     GameObject  _instantiatedBall;
     Vector3 _ballToShootPosition, _nextBallToShootPosition;
-    static Vector3 _targetSpawnPosition;
+    static Vector3 _targetSpawnPosition, _rightSpawnPosition, _leftSpawnPosition;
     public bool StartingBlockSpawned = false, BallRowSpawned = false;
     float _ballSpawnOffset, _rowHorizontalOffset, _ballContainerMoveDistance, _timeDelayBetweenSpawningStartRows;
     int _ballQuantityPerRow;
@@ -43,7 +43,8 @@ public class BallSpawner : MonoBehaviour
         _ballSpawnOffset = 0.72f;
         _ballQuantityPerRow = 6;
         _targetSpawnPosition = _referencePoint.position;
-        
+        _rightSpawnPosition = new Vector3 (_targetSpawnPosition.x + _rowHorizontalOffset, _targetSpawnPosition.y,0);
+        _leftSpawnPosition =  new Vector3 (_targetSpawnPosition.x, _targetSpawnPosition.y,0);
     }
 
     void Start()
@@ -51,6 +52,7 @@ public class BallSpawner : MonoBehaviour
         _ballShooter = BallShooter.Instance;
         _objectPooler = ObjectPools.Instance;
         _ballInteractionManager = BallInteractionManager.Instance;
+
         StartCoroutine(SpawnBallStartingBlock());
         InstantiateFirstBallToShoot();
         SpawnBallsToShoot();
@@ -90,11 +92,11 @@ public class BallSpawner : MonoBehaviour
         BallDropper.Instance.BallsAttachedToCeiling.Clear();
         if(!_rowToSpawnIsToTheRightSide)
         {
-            _targetSpawnPosition = new Vector3 (_targetSpawnPosition.x + _rowHorizontalOffset, _targetSpawnPosition.y,0);
+            _targetSpawnPosition = _leftSpawnPosition;
         }
         else
         {
-            _targetSpawnPosition = new Vector3 (_targetSpawnPosition.x, _targetSpawnPosition.y,0);
+            _targetSpawnPosition = _rightSpawnPosition;
         }
 
         for (int i = 0; i < _ballQuantityPerRow; i++)
@@ -105,7 +107,6 @@ public class BallSpawner : MonoBehaviour
             _instantiatedBall.transform.SetParent(BallContainer.transform);
             BallDropper.Instance.BallsAttachedToCeiling.Add(_instantiatedBall);
 
-            //Debug.Log(_targetSpawnPosition);
         }
 
         _rowToSpawnIsToTheRightSide = !_rowToSpawnIsToTheRightSide;
@@ -138,8 +139,8 @@ public class BallSpawner : MonoBehaviour
         _nextBallToShoot = _objectPooler.GetRandomPooledBall();
         _objectPooler.ActivateAndSetPooledObjectPosition(_nextBallToShoot, _nextBallToShootPosition, 0.7f);
         _nextBallToShoot.transform.SetParent(BallShooterContainer.transform);
-        _nextBallToShoot.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Kinematic;
-        _nextBallToShoot.GetComponent<CircleCollider2D>().enabled = false;
+        _nextBallToShoot.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Kinematic; //tetbaddel men west l ball bidha
+        _nextBallToShoot.GetComponent<CircleCollider2D>().enabled = false;//tetbaddel men west l ball bidha
     }
 
     IEnumerator MoveDownBallContainer()

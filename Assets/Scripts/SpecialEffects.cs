@@ -29,7 +29,6 @@ public class SpecialEffects : MonoBehaviour
     {
         PopSurroundingBalls();
         PerfectNotification();
-
     }
     void PopSurroundingBalls()
     {
@@ -48,7 +47,6 @@ public class SpecialEffects : MonoBehaviour
             }
             _ballInteractionManager.ResultingBall.gameObject.SetActive(false);
             _ballInteractionManager.ResultingBall.gameObject.transform.parent = _objectPooler.transform;
-            
         }
     }
 
